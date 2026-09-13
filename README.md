@@ -1,4 +1,4 @@
-# Appointment Desk
+# Appointment Tracker
 
 Persistent appointment management for the existing Google Sheets workflow. This is a Next.js full-stack application with local XAMPP MySQL through Prisma. Appointment status values remain `Missed`, `Held`, and `Sold`; imported spreadsheet columns are retained in `rawData` alongside normalized fields used by the dashboard.
 
@@ -18,7 +18,7 @@ Open `http://localhost:3000`.
 
 ## Import the existing records
 
-The supplied Google Sheets URL currently requires Google authentication, so the application does not guess or fabricate those records. In Google Sheets, open the source tab (`gid=1071544471`), choose **File > Download > Comma-separated values (.csv)**, then use **Import CSV** in Appointment Desk.
+The supplied Google Sheets URL currently requires Google authentication, so the application does not guess or fabricate those records. In Google Sheets, open the source tab (`gid=1071544471`), choose **File > Download > Comma-separated values (.csv)**, then use **Import CSV** in Appointment Tracker.
 
 The importer:
 

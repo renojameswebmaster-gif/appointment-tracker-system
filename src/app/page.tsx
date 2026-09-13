@@ -56,7 +56,7 @@ const info: Record<
   { label: string; color: string; className: string }
 > = {
   MISSED: { label: "Missed", color: "#ee6b5d", className: "status-missed" },
-  HELD: { label: "Held", color: "#3eaa85", className: "status-held" },
+  HELD: { label: "Held", color: "#2563EB", className: "status-held" },
   SOLD: { label: "Sold", color: "#e6b84d", className: "status-sold" },
   PENDING: {
     label: "Pending / Unassigned",
@@ -232,7 +232,7 @@ export default function Home() {
           </div>
           <div>
             <strong>appointment</strong>
-            <span>DESK</span>
+            <span>TRACKER</span>
           </div>
         </div>
         <div className="workspace-label">WORKSPACE</div>
@@ -828,7 +828,7 @@ export default function Home() {
           )}
         </section>
         <footer>
-          <span>Appointment Desk</span>
+          <span>Appointment Tracker</span>
           <span>Persistent workspace · Data sourced from your database</span>
         </footer>
       </main>
