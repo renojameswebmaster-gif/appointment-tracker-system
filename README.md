@@ -1,16 +1,16 @@
 # Appointment Desk
 
-Persistent appointment management for the existing Google Sheets workflow. This is a Next.js full-stack application with PostgreSQL through Prisma. Appointment status values remain `Missed`, `Held`, and `Sold`; imported spreadsheet columns are retained in `rawData` alongside normalized fields used by the dashboard.
+Persistent appointment management for the existing Google Sheets workflow. This is a Next.js full-stack application with local XAMPP MySQL through Prisma. Appointment status values remain `Missed`, `Held`, and `Sold`; imported spreadsheet columns are retained in `rawData` alongside normalized fields used by the dashboard.
 
 ## Local setup
 
-1. Create a PostgreSQL database and copy `.env.example` to `.env`.
-2. Set `DATABASE_URL` to the database connection string.
-3. Install dependencies and create the first migration:
+1. Install XAMPP and start **MySQL** in the XAMPP Control Panel.
+2. The local database `appointment_tracker` and `.env` connection have already been configured for the default XAMPP root account.
+3. Install dependencies and synchronize the schema:
 
 ```bash
 npm install
-npx prisma migrate dev --name init
+npm run db:push
 npm run dev
 ```
 
@@ -29,9 +29,21 @@ The importer:
 
 For a private sheet, the CSV export is the reliable one-time migration path. No Google credentials are stored in the browser.
 
-## Production deployment
+## Local database details
 
-Deploy the Next.js app to Vercel, Azure App Service, or another Node-compatible host with a managed PostgreSQL database. Configure `DATABASE_URL` as a server-side environment variable, run the build, and apply migrations during release:
+The app connects to:
+
+```text
+mysql://root@127.0.0.1:3306/appointment_tracker
+```
+
+The API is available at `/api/appointments`, `/api/appointments/:id`, and `/api/import`. Dashboard totals are calculated from the filtered database query on every refresh and status update. No fake appointment records are created.
+
+If you set a MySQL root password in XAMPP, update `DATABASE_URL` in `.env` to `mysql://root:YOUR_PASSWORD@127.0.0.1:3306/appointment_tracker`.
+
+## Deployment
+
+The full application should run on a Node-compatible host with a reachable MySQL database. GitHub Pages can host the static browser-only version in `docs/`, but cannot run the API or database.
 
 ```bash
 npm run db:generate
@@ -39,8 +51,6 @@ npm run db:migrate
 npm run build
 npm start
 ```
-
-The API is available at `/api/appointments`, `/api/appointments/:id`, and `/api/import`. Dashboard totals are calculated from the filtered database query on every refresh and status update; no browser-only storage or hardcoded appointment counts are used.
 
 ## Validation
 
