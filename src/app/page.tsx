@@ -74,6 +74,12 @@ const formatDate = (value: string) =>
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(value));
+const sourceValue = (rawData: Record<string, string>, keys: string[]) => {
+  const key = Object.keys(rawData || {}).find((candidate) =>
+    keys.includes(candidate.trim().toLowerCase()),
+  );
+  return key ? String(rawData[key] || "").trim() : "";
+};
 
 export default function Home() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -682,12 +688,12 @@ export default function Home() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Client / patient</th>
-                      <th>Booked by</th>
-                      <th>Appointment</th>
-                      <th>Provider</th>
-                      <th>Status</th>
-                      <th>Original fields</th>
+                      <th>Date</th>
+                      <th>SDR Name</th>
+                      <th>Doctor&apos;s Name</th>
+                      <th>Date of Appt</th>
+                      <th>Time of Appt</th>
+                      <th>STATUS</th>
                       <th />
                     </tr>
                   </thead>
@@ -695,33 +701,39 @@ export default function Home() {
                     {visibleAppointments.map((appointment) => (
                       <tr key={appointment.id}>
                         <td>
-                          <strong>
-                            {appointment.patientName || "Unnamed client"}
-                          </strong>
-                          <small>{appointment.notes || "No notes"}</small>
+                          {sourceValue(appointment.rawData, [
+                            "date",
+                            "date??",
+                          ]) || "Date not set"}
                         </td>
-                        <td>{appointment.sdrName || "Unassigned"}</td>
                         <td>
-                          <strong>
-                            {formatDate(appointment.appointmentDate)}
-                          </strong>
-                          <small>
-                            {appointment.appointmentTime || "Time not set"}
-                          </small>
+                          <strong>{appointment.sdrName || "Unassigned"}</strong>
                         </td>
                         <td>{appointment.doctorName || "Unassigned"}</td>
+                        <td>
+                          <strong>
+                            {sourceValue(appointment.rawData, [
+                              "date of appt",
+                              "date of appointment",
+                              "appointment date",
+                            ]) || formatDate(appointment.appointmentDate)}
+                          </strong>
+                        </td>
+                        <td>
+                          {sourceValue(appointment.rawData, [
+                            "time of appt",
+                            "time of appointment (est)",
+                            "appointment time",
+                          ]) ||
+                            appointment.appointmentTime ||
+                            "Time not set"}
+                        </td>
                         <td>
                           <span
                             className={`status-badge ${info[appointment.status].className}`}
                           >
                             <i />
                             {info[appointment.status].label}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="field-count">
-                            {Object.keys(appointment.rawData || {}).length || 0}{" "}
-                            preserved
                           </span>
                         </td>
                         <td>
