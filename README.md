@@ -29,6 +29,15 @@ The importer:
 
 For a private sheet, the CSV export is the reliable one-time migration path. No Google credentials are stored in the browser.
 
+The provided workbook `Appointment Tracker - PH (1).xlsx` has been imported from its `2023`, `2024`, `2025`, and `2026` sheets. The import created 3,914 records in XAMPP. To repeat the import with another workbook:
+
+```bash
+$env:DATABASE_URL='mysql://root@127.0.0.1:3306/appointment_tracker'
+npm run db:import-workbook -- "C:\path\to\Appointment Tracker.xlsx"
+```
+
+The importer keeps the original workbook values in `rawData`. `Held` maps to Held, `SOLD` maps to Sold, and other original statuses are retained in `rawData` while contributing to Missed dashboard totals.
+
 ## Local database details
 
 The app connects to:

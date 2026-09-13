@@ -11,7 +11,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma db push",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:import-workbook": "tsx scripts/import-workbook.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -22,6 +23,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.6.4"
   },
   "devDependencies": {
