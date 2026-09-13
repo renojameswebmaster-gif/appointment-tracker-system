@@ -294,6 +294,7 @@ export default function Home() {
             <h1>
               Good morning, team <span className="wave">✦</span>
             </h1>
+            <p className="hero-subtitle">Here&apos;s what&apos;s happening with your appointments today.</p>
           </div>
           <div className="top-actions">
             <button
