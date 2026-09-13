@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,6 +16,7 @@ enum AppointmentStatus {
 
 model Appointment {
   id              String            @id @default(cuid())
+  bookedDate      DateTime?
   appointmentDate DateTime
   appointmentTime String            @default("")
   status          AppointmentStatus @default(MISSED)
@@ -29,6 +30,7 @@ model Appointment {
   updatedAt       DateTime          @updatedAt
 
   @@index([appointmentDate])
+  @@index([bookedDate])
   @@index([status])
   @@index([doctorName])
   @@index([sdrName])

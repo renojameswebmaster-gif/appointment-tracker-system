@@ -66,12 +66,20 @@ function normalizedRecord(
     value(row as Record<string, string>, dateNames),
   );
   if (!appointmentDate) return null;
+  const bookedDate = parseDateInput(
+    value(row as Record<string, string>, [
+      "booked date",
+      "date booked",
+      "date",
+    ]),
+  );
   const originalStatus = value(row as Record<string, string>, [
     "status",
     "status ",
     "appointment status",
   ]);
   return {
+    bookedDate,
     appointmentDate,
     appointmentTime: value(row as Record<string, string>, [
       "appointment time",

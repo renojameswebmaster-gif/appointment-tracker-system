@@ -12,10 +12,16 @@ export async function PATCH(
     const appointmentDate = body.appointmentDate
       ? parseDateInput(body.appointmentDate)
       : undefined;
+    const bookedDate = body.bookedDate
+      ? parseDateInput(body.bookedDate)
+      : body.bookedDate === ""
+        ? null
+        : undefined;
     const appointment = await prisma.appointment.update({
       where: { id },
       data: {
         ...(appointmentDate ? { appointmentDate } : {}),
+        ...(bookedDate !== undefined ? { bookedDate } : {}),
         ...(body.appointmentTime !== undefined
           ? { appointmentTime: body.appointmentTime }
           : {}),

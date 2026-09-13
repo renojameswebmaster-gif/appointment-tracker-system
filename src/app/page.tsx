@@ -35,6 +35,7 @@ import {
 type Status = "MISSED" | "HELD" | "SOLD" | "PENDING";
 type Appointment = {
   id: string;
+  bookedDate: string | null;
   appointmentDate: string;
   appointmentTime: string;
   status: Status;
@@ -90,6 +91,7 @@ export default function Home() {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [date, setDate] = useState("");
+  const [dateField, setDateField] = useState("appointment");
   const [doctor, setDoctor] = useState("");
   const [sdrName, setSdrName] = useState("");
   const [sdrNames, setSdrNames] = useState<string[]>([]);
@@ -110,6 +112,7 @@ export default function Home() {
       ["year", year],
       ["month", month],
       ["date", date],
+      ["dateField", dateField],
       ["doctor", doctor],
       ["sdr", sdrName],
       ["sort", sort],
@@ -132,7 +135,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [date, doctor, month, query, sdrName, sort, status, year]);
+  }, [date, dateField, doctor, month, query, sdrName, sort, status, year]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void load();
@@ -192,6 +195,7 @@ export default function Home() {
     setYear("");
     setMonth("");
     setDate("");
+    setDateField("appointment");
     setDoctor("");
     setSdrName("");
   };
@@ -218,7 +222,7 @@ export default function Home() {
     String(new Date().getFullYear() - index),
   );
   const viewLabel = date
-    ? formatDate(`${date}T00:00:00Z`)
+    ? `${dateField === "booked" ? "Booked" : "Appointment"}: ${formatDate(`${date}T00:00:00Z`)}`
     : year
       ? `${year}${month ? ` / ${new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2020, Number(month) - 1, 1)))}` : ""}`
       : "All time";
@@ -424,6 +428,14 @@ export default function Home() {
                 setMonth("");
               }}
             />
+            <select
+              value={dateField}
+              onChange={(event) => setDateField(event.target.value)}
+              aria-label="Date filter field"
+            >
+              <option value="appointment">Filter: appointment date</option>
+              <option value="booked">Filter: booked date</option>
+            </select>
             <button className="reset-button" onClick={clear}>
               Reset
             </button>
@@ -694,7 +706,10 @@ export default function Home() {
                           {sourceValue(appointment.rawData, [
                             "date",
                             "date??",
-                          ]) || "Date not set"}
+                            ]) ||
+                            (appointment.bookedDate
+                              ? formatDate(appointment.bookedDate)
+                              : "Date not set")}
                         </td>
                         <td>
                           <strong>{appointment.sdrName || "Unassigned"}</strong>
@@ -898,6 +913,7 @@ function AppointmentForm({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState({
+    bookedDate: appointment?.bookedDate?.slice(0, 10) || "",
     appointmentDate: appointment?.appointmentDate.slice(0, 10) || "",
     appointmentTime: appointment?.appointmentTime || "",
     patientName: appointment?.patientName || "",
@@ -943,6 +959,14 @@ function AppointmentForm({
         </div>
         <form onSubmit={save}>
           <div className="form-grid">
+            <label>
+              Booked date
+              <input
+                type="date"
+                value={form.bookedDate}
+                onChange={(event) => change("bookedDate", event.target.value)}
+              />
+            </label>
             <label>
               Appointment date
               <input

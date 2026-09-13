@@ -5,6 +5,7 @@ import { getRange, normalizeStatus, parseDateInput } from "@/lib/appointment";
 function getWhere(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const date = params.get("date");
+  const dateField = params.get("dateField") === "booked" ? "bookedDate" : "appointmentDate";
   const year = params.get("year");
   const month = params.get("month");
   const status = params.get("status");
@@ -16,7 +17,7 @@ function getWhere(request: NextRequest) {
   if (date) {
     const start = getRange(date);
     const end = getRange(date, true);
-    if (start && end) where.appointmentDate = { gte: start, lt: end };
+    if (start && end) where[dateField] = { gte: start, lt: end };
   } else if (year) {
     const start = new Date(
       Date.UTC(Number(year), month ? Number(month) - 1 : 0, 1),
@@ -24,7 +25,7 @@ function getWhere(request: NextRequest) {
     const end = month
       ? new Date(Date.UTC(Number(year), Number(month), 1))
       : new Date(Date.UTC(Number(year) + 1, 0, 1));
-    where.appointmentDate = { gte: start, lt: end };
+    where[dateField] = { gte: start, lt: end };
   }
   if (status && ["MISSED", "HELD", "SOLD", "PENDING"].includes(status))
     where.status = status;
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const appointmentDate = parseDateInput(body.appointmentDate);
+    const bookedDate = body.bookedDate ? parseDateInput(body.bookedDate) : null;
     if (!appointmentDate || !body.patientName?.trim())
       return NextResponse.json(
         { error: "Appointment date and patient/client name are required." },
@@ -106,6 +108,7 @@ export async function POST(request: NextRequest) {
     const appointment = await prisma.appointment.create({
       data: {
         appointmentDate,
+        bookedDate,
         appointmentTime: body.appointmentTime ?? "",
         status: normalizeStatus(body.status),
         patientName: body.patientName.trim(),

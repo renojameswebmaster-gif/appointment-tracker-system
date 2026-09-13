@@ -15,7 +15,8 @@
     "db:import-workbook": "tsx scripts/import-workbook.ts",
     "db:backfill-sdr": "tsx scripts/backfill-sdr.ts",
     "db:fix-dates": "tsx scripts/fix-imported-dates.ts",
-    "db:fix-blank-statuses": "tsx scripts/fix-blank-statuses.ts"
+    "db:fix-blank-statuses": "tsx scripts/fix-blank-statuses.ts",
+    "db:backfill-booked-dates": "tsx scripts/backfill-booked-dates.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
