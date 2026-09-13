@@ -86,6 +86,8 @@ export default function Home() {
   const [month, setMonth] = useState("");
   const [date, setDate] = useState("");
   const [doctor, setDoctor] = useState("");
+  const [sdrName, setSdrName] = useState("");
+  const [sdrNames, setSdrNames] = useState<string[]>([]);
   const [sort, setSort] = useState("booked-by");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
@@ -101,6 +103,7 @@ export default function Home() {
       ["month", month],
       ["date", date],
       ["doctor", doctor],
+      ["sdr", sdrName],
       ["sort", sort],
     ].forEach(([key, value]) => value && params.set(key, value));
     try {
@@ -109,6 +112,7 @@ export default function Home() {
       if (!response.ok) throw new Error(data.error);
       setAppointments(data.appointments);
       setStats(data.stats);
+      setSdrNames(data.sdrNames || []);
       setMessage("");
     } catch (error) {
       setMessage(
@@ -119,7 +123,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [date, doctor, month, query, sort, status, year]);
+  }, [date, doctor, month, query, sdrName, sort, status, year]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void load();
@@ -142,6 +146,7 @@ export default function Home() {
     setMonth("");
     setDate("");
     setDoctor("");
+    setSdrName("");
   };
   const importCsv = async (file?: File) => {
     if (!file) return;
@@ -303,6 +308,18 @@ export default function Home() {
               <option value="HELD">Held</option>
               <option value="SOLD">Sold</option>
               <option value="PENDING">Pending / Unassigned</option>
+            </select>
+            <select
+              value={sdrName}
+              onChange={(event) => setSdrName(event.target.value)}
+              aria-label="Filter by booked by"
+            >
+              <option value="">All booked by</option>
+              {sdrNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
             </select>
             <select
               value={year}

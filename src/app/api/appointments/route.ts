@@ -9,6 +9,7 @@ function getWhere(request: NextRequest) {
   const month = params.get("month");
   const status = params.get("status");
   const doctor = params.get("doctor");
+  const sdr = params.get("sdr");
   const q = params.get("q");
   const where: Record<string, unknown> = {};
 
@@ -28,6 +29,7 @@ function getWhere(request: NextRequest) {
   if (status && ["MISSED", "HELD", "SOLD", "PENDING"].includes(status))
     where.status = status;
   if (doctor) where.doctorName = { contains: doctor, mode: "insensitive" };
+  if (sdr) where.sdrName = sdr;
   if (q)
     where.OR = [
       { patientName: { contains: q, mode: "insensitive" } },
@@ -59,6 +61,12 @@ export async function GET(request: NextRequest) {
       where: getWhere(request),
       orderBy,
     });
+    const sdrNames = await prisma.appointment.findMany({
+      where: { NOT: { sdrName: "" } },
+      distinct: ["sdrName"],
+      select: { sdrName: true },
+      orderBy: { sdrName: "asc" },
+    });
     const stats = appointments.reduce(
       (result, appointment) => {
         result.total += 1;
@@ -70,7 +78,11 @@ export async function GET(request: NextRequest) {
       },
       { total: 0, missed: 0, held: 0, sold: 0, pending: 0 },
     );
-    return NextResponse.json({ appointments, stats });
+    return NextResponse.json({
+      appointments,
+      stats,
+      sdrNames: sdrNames.map((item) => item.sdrName),
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
