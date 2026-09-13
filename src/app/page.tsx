@@ -92,7 +92,10 @@ export default function Home() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reportDetailsOpen, setReportDetailsOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const pageSize = 25;
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -113,6 +116,7 @@ export default function Home() {
       setAppointments(data.appointments);
       setStats(data.stats);
       setSdrNames(data.sdrNames || []);
+      setCurrentPage(1);
       setMessage("");
     } catch (error) {
       setMessage(
@@ -172,6 +176,11 @@ export default function Home() {
       left.name.localeCompare(right.name),
     );
   }, [appointments]);
+  const totalPages = Math.max(1, Math.ceil(appointments.length / pageSize));
+  const visibleAppointments = appointments.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
   const clear = () => {
     setQuery("");
     setStatus("");
@@ -294,7 +303,9 @@ export default function Home() {
             <h1>
               Good morning, team <span className="wave">✦</span>
             </h1>
-            <p className="hero-subtitle">Here&apos;s what&apos;s happening with your appointments today.</p>
+            <p className="hero-subtitle">
+              Here&apos;s what&apos;s happening with your appointments today.
+            </p>
           </div>
           <div className="top-actions">
             <button
@@ -582,7 +593,15 @@ export default function Home() {
                 <span className="table-count">{sdrReport.length} SDRs</span>
               </h3>
             </div>
-            <span className="panel-period">{viewLabel}</span>
+            <div className="report-actions">
+              <span className="panel-period">{viewLabel}</span>
+              <button
+                className="outline-button report-toggle"
+                onClick={() => setReportDetailsOpen((open) => !open)}
+              >
+                {reportDetailsOpen ? "Hide details" : "Show details"}
+              </button>
+            </div>
           </div>
           <div className="report-summary-grid">
             {sdrReport.map((report) => (
@@ -596,41 +615,45 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="table-scroll">
-            <table className="report-table">
-              <thead>
-                <tr>
-                  <th>Booked by / SDR</th>
-                  <th>Client / practice</th>
-                  <th>Appointment date</th>
-                  <th>Appointment time</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((appointment) => (
-                  <tr key={`report-${appointment.id}`}>
-                    <td>
-                      <strong>{appointment.sdrName || "Unassigned"}</strong>
-                    </td>
-                    <td>{appointment.patientName || "Unnamed client"}</td>
-                    <td>
-                      <strong>{formatDate(appointment.appointmentDate)}</strong>
-                    </td>
-                    <td>{appointment.appointmentTime || "Time not set"}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${info[appointment.status].className}`}
-                      >
-                        <i />
-                        {info[appointment.status].label}
-                      </span>
-                    </td>
+          {reportDetailsOpen && (
+            <div className="table-scroll">
+              <table className="report-table">
+                <thead>
+                  <tr>
+                    <th>Booked by / SDR</th>
+                    <th>Client / practice</th>
+                    <th>Appointment date</th>
+                    <th>Appointment time</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {visibleAppointments.map((appointment) => (
+                    <tr key={`report-${appointment.id}`}>
+                      <td>
+                        <strong>{appointment.sdrName || "Unassigned"}</strong>
+                      </td>
+                      <td>{appointment.patientName || "Unnamed client"}</td>
+                      <td>
+                        <strong>
+                          {formatDate(appointment.appointmentDate)}
+                        </strong>
+                      </td>
+                      <td>{appointment.appointmentTime || "Time not set"}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${info[appointment.status].className}`}
+                        >
+                          <i />
+                          {info[appointment.status].label}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
         <section className="panel appointments-panel" id="appointments">
           <div className="panel-heading table-heading">
@@ -654,78 +677,112 @@ export default function Home() {
           {loading ? (
             <div className="table-empty">Loading records...</div>
           ) : appointments.length ? (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Client / patient</th>
-                    <th>Booked by</th>
-                    <th>Date & time</th>
-                    <th>Provider</th>
-                    <th>Status</th>
-                    <th>Original fields</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((appointment) => (
-                    <tr key={appointment.id}>
-                      <td>
-                        <strong>
-                          {appointment.patientName || "Unnamed client"}
-                        </strong>
-                        <small>{appointment.notes || "No notes"}</small>
-                      </td>
-                      <td>{appointment.sdrName || "Unassigned"}</td>
-                      <td>
-                        <strong>
-                          {formatDate(appointment.appointmentDate)}
-                        </strong>
-                        <small>
-                          {appointment.appointmentTime || "Time not set"}
-                        </small>
-                      </td>
-                      <td>{appointment.doctorName || "Unassigned"}</td>
-                      <td>
-                        <span
-                          className={`status-badge ${info[appointment.status].className}`}
-                        >
-                          <i />
-                          {info[appointment.status].label}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="field-count">
-                          {Object.keys(appointment.rawData || {}).length || 0}{" "}
-                          preserved
-                        </span>
-                      </td>
-                      <td>
-                        <div className="row-actions">
-                          <button
-                            className="icon-button"
-                            onClick={() => {
-                              setEditing(appointment);
-                              setFormOpen(true);
-                            }}
-                            aria-label="Edit appointment"
-                          >
-                            <Pencil size={15} />
-                          </button>
-                          <button
-                            className="icon-button danger"
-                            onClick={() => void remove(appointment.id)}
-                            aria-label="Delete appointment"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </td>
+            <>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Client / patient</th>
+                      <th>Booked by</th>
+                      <th>Appointment</th>
+                      <th>Provider</th>
+                      <th>Status</th>
+                      <th>Original fields</th>
+                      <th />
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {visibleAppointments.map((appointment) => (
+                      <tr key={appointment.id}>
+                        <td>
+                          <strong>
+                            {appointment.patientName || "Unnamed client"}
+                          </strong>
+                          <small>{appointment.notes || "No notes"}</small>
+                        </td>
+                        <td>{appointment.sdrName || "Unassigned"}</td>
+                        <td>
+                          <strong>
+                            {formatDate(appointment.appointmentDate)}
+                          </strong>
+                          <small>
+                            {appointment.appointmentTime || "Time not set"}
+                          </small>
+                        </td>
+                        <td>{appointment.doctorName || "Unassigned"}</td>
+                        <td>
+                          <span
+                            className={`status-badge ${info[appointment.status].className}`}
+                          >
+                            <i />
+                            {info[appointment.status].label}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="field-count">
+                            {Object.keys(appointment.rawData || {}).length || 0}{" "}
+                            preserved
+                          </span>
+                        </td>
+                        <td>
+                          <div className="row-actions">
+                            <button
+                              className="icon-button"
+                              onClick={() => {
+                                setEditing(appointment);
+                                setFormOpen(true);
+                              }}
+                              aria-label="Edit appointment"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              className="icon-button danger"
+                              onClick={() => void remove(appointment.id)}
+                              aria-label="Delete appointment"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="pagination-bar">
+                <span>
+                  Showing {(currentPage - 1) * pageSize + 1}–
+                  {Math.min(currentPage * pageSize, appointments.length)} of{" "}
+                  {appointments.length}
+                </span>
+                <div className="pagination-actions">
+                  <button
+                    className="icon-button"
+                    disabled={currentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
+                    }
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+                  <strong>
+                    Page {currentPage} of {totalPages}
+                  </strong>
+                  <button
+                    className="icon-button"
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(totalPages, page + 1))
+                    }
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="empty-state">
               <div className="empty-icon">
