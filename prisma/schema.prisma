@@ -19,6 +19,7 @@ model Appointment {
   appointmentTime String            @default("")
   status          AppointmentStatus @default(MISSED)
   patientName     String            @default("")
+  sdrName         String            @default("")
   doctorName      String            @default("")
   notes           String            @default("")
   rawData         Json              @default("{}")
@@ -29,4 +30,5 @@ model Appointment {
   @@index([appointmentDate])
   @@index([status])
   @@index([doctorName])
+  @@index([sdrName])
 }
