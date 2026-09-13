@@ -32,7 +32,7 @@ import {
   YAxis,
 } from "recharts";
 
-type Status = "MISSED" | "HELD" | "SOLD";
+type Status = "MISSED" | "HELD" | "SOLD" | "PENDING";
 type Appointment = {
   id: string;
   appointmentDate: string;
@@ -44,7 +44,13 @@ type Appointment = {
   notes: string;
   rawData: Record<string, string>;
 };
-type Stats = { total: number; missed: number; held: number; sold: number };
+type Stats = {
+  total: number;
+  missed: number;
+  held: number;
+  sold: number;
+  pending: number;
+};
 const info: Record<
   Status,
   { label: string; color: string; className: string }
@@ -52,8 +58,13 @@ const info: Record<
   MISSED: { label: "Missed", color: "#ee6b5d", className: "status-missed" },
   HELD: { label: "Held", color: "#3eaa85", className: "status-held" },
   SOLD: { label: "Sold", color: "#e6b84d", className: "status-sold" },
+  PENDING: {
+    label: "Pending / Unassigned",
+    color: "#8b96a3",
+    className: "status-pending",
+  },
 };
-const emptyStats = { total: 0, missed: 0, held: 0, sold: 0 };
+const emptyStats = { total: 0, missed: 0, held: 0, sold: 0, pending: 0 };
 const pct = (value: number, total: number) =>
   total ? `${Math.round((value / total) * 100)}%` : "0%";
 const formatDate = (value: string) =>
@@ -120,6 +131,7 @@ export default function Home() {
       { name: "Missed", count: stats.missed, fill: info.MISSED.color },
       { name: "Held", count: stats.held, fill: info.HELD.color },
       { name: "Sold", count: stats.sold, fill: info.SOLD.color },
+      { name: "Pending", count: stats.pending, fill: info.PENDING.color },
     ],
     [stats],
   );
@@ -290,6 +302,7 @@ export default function Home() {
               <option value="MISSED">Missed</option>
               <option value="HELD">Held</option>
               <option value="SOLD">Sold</option>
+              <option value="PENDING">Pending / Unassigned</option>
             </select>
             <select
               value={year}
@@ -396,6 +409,13 @@ export default function Home() {
             detail={`${pct(stats.sold, stats.total)} conversion`}
             icon={<TrendingUp size={19} />}
             tone="gold"
+          />
+          <Metric
+            label="Pending / unassigned"
+            value={stats.pending}
+            detail={`${pct(stats.pending, stats.total)} of total`}
+            icon={<Clock3 size={19} />}
+            tone="slate"
           />
         </section>
         <section className="secondary-metrics">
@@ -802,6 +822,7 @@ function AppointmentForm({
                 <option value="MISSED">Missed</option>
                 <option value="HELD">Held</option>
                 <option value="SOLD">Sold</option>
+                <option value="PENDING">Pending / Unassigned</option>
               </select>
             </label>
             <label className="wide">

@@ -36,7 +36,7 @@ $env:DATABASE_URL='mysql://root@127.0.0.1:3306/appointment_tracker'
 npm run db:import-workbook -- "C:\path\to\Appointment Tracker.xlsx"
 ```
 
-The importer keeps the original workbook values in `rawData`. `Held` maps to Held, `SOLD` maps to Sold, and other original statuses are retained in `rawData` while contributing to Missed dashboard totals.
+The importer keeps the original workbook values in `rawData`. `Held` maps to Held, `SOLD` maps to Sold, blank/`-` statuses map to Pending / Unassigned, and other explicit source statuses map to Missed while remaining preserved in `rawData`.
 
 ## Local database details
 

@@ -25,7 +25,7 @@ function getWhere(request: NextRequest) {
       : new Date(Date.UTC(Number(year) + 1, 0, 1));
     where.appointmentDate = { gte: start, lt: end };
   }
-  if (status && ["MISSED", "HELD", "SOLD"].includes(status))
+  if (status && ["MISSED", "HELD", "SOLD", "PENDING"].includes(status))
     where.status = status;
   if (doctor) where.doctorName = { contains: doctor, mode: "insensitive" };
   if (q)
@@ -63,11 +63,12 @@ export async function GET(request: NextRequest) {
       (result, appointment) => {
         result.total += 1;
         result[
-          appointment.status.toLowerCase() as "missed" | "held" | "sold"
+          appointment.status.toLowerCase() as
+            "missed" | "held" | "sold" | "pending"
         ] += 1;
         return result;
       },
-      { total: 0, missed: 0, held: 0, sold: 0 },
+      { total: 0, missed: 0, held: 0, sold: 0, pending: 0 },
     );
     return NextResponse.json({ appointments, stats });
   } catch (error) {
