@@ -80,6 +80,14 @@ const sourceValue = (rawData: Record<string, string>, keys: string[]) => {
   );
   return key ? String(rawData[key] || "").trim() : "";
 };
+const inputDateForOffset = (offset: number) => {
+  const value = new Date();
+  value.setDate(value.getDate() + offset);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 export default function Home() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -223,6 +231,14 @@ export default function Home() {
     : year
       ? `${year}${month ? ` / ${new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2020, Number(month) - 1, 1)))}` : ""}`
       : "All time";
+  const selectDay = (offset: number) => {
+    setDate(inputDateForOffset(offset));
+    setYear("");
+    setMonth("");
+    document
+      .getElementById("reports")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   return (
     <div className="app-shell">
       <aside className={`sidebar ${navOpen ? "sidebar-open" : ""}`}>
@@ -454,6 +470,28 @@ export default function Home() {
                 day: "numeric",
               }).format(new Date())}
             </strong>
+          </div>
+          <div className="day-quick-actions">
+            <button
+              className={
+                date === inputDateForOffset(0)
+                  ? "day-quick active"
+                  : "day-quick"
+              }
+              onClick={() => selectDay(0)}
+            >
+              Today
+            </button>
+            <button
+              className={
+                date === inputDateForOffset(1)
+                  ? "day-quick active"
+                  : "day-quick"
+              }
+              onClick={() => selectDay(1)}
+            >
+              Tomorrow
+            </button>
           </div>
         </section>
         <section className="metric-grid">
