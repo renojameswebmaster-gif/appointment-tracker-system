@@ -139,6 +139,39 @@ export default function Home() {
     ],
     [stats],
   );
+  const sdrReport = useMemo(() => {
+    const grouped = new Map<
+      string,
+      {
+        name: string;
+        total: number;
+        held: number;
+        sold: number;
+        missed: number;
+        pending: number;
+      }
+    >();
+    appointments.forEach((appointment) => {
+      const name = appointment.sdrName || "Unassigned";
+      const current = grouped.get(name) || {
+        name,
+        total: 0,
+        held: 0,
+        sold: 0,
+        missed: 0,
+        pending: 0,
+      };
+      current.total += 1;
+      current[
+        appointment.status.toLowerCase() as
+          "held" | "sold" | "missed" | "pending"
+      ] += 1;
+      grouped.set(name, current);
+    });
+    return [...grouped.values()].sort((left, right) =>
+      left.name.localeCompare(right.name),
+    );
+  }, [appointments]);
   const clear = () => {
     setQuery("");
     setStatus("");
@@ -214,7 +247,14 @@ export default function Home() {
             <Plus size={18} />
             Add appointment
           </button>
-          <button className="nav-item">
+          <button
+            className="nav-item"
+            onClick={() =>
+              document
+                .getElementById("reports")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
             <BarChart3 size={18} />
             Reports
           </button>
@@ -530,6 +570,65 @@ export default function Home() {
                 <EmptyChart message="Your live distribution will appear here." />
               )}
             </div>
+          </div>
+        </section>
+        <section className="panel reports-panel" id="reports">
+          <div className="panel-heading table-heading">
+            <div>
+              <p className="eyebrow">REPORTS / SDR PERFORMANCE</p>
+              <h3>
+                Booked appointment report{" "}
+                <span className="table-count">{sdrReport.length} SDRs</span>
+              </h3>
+            </div>
+            <span className="panel-period">{viewLabel}</span>
+          </div>
+          <div className="report-summary-grid">
+            {sdrReport.map((report) => (
+              <div className="report-summary" key={report.name}>
+                <strong>{report.name}</strong>
+                <span>{report.total} appointments</span>
+                <small>
+                  Held {report.held} · Sold {report.sold} · Missed{" "}
+                  {report.missed} · Pending {report.pending}
+                </small>
+              </div>
+            ))}
+          </div>
+          <div className="table-scroll">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Booked by / SDR</th>
+                  <th>Client / practice</th>
+                  <th>Appointment date</th>
+                  <th>Appointment time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.map((appointment) => (
+                  <tr key={`report-${appointment.id}`}>
+                    <td>
+                      <strong>{appointment.sdrName || "Unassigned"}</strong>
+                    </td>
+                    <td>{appointment.patientName || "Unnamed client"}</td>
+                    <td>
+                      <strong>{formatDate(appointment.appointmentDate)}</strong>
+                    </td>
+                    <td>{appointment.appointmentTime || "Time not set"}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${info[appointment.status].className}`}
+                      >
+                        <i />
+                        {info[appointment.status].label}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
         <section className="panel appointments-panel" id="appointments">
